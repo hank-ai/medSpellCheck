@@ -1,0 +1,1 @@
+C:\medSpellCheck\web_server.exe C:\medSpellCheck\model_medical.bin localhost 55555

@@ -196,14 +196,18 @@ You can generate extensions for other languages using [swig tutorial](http://www
 ## HTTP API
 * Install ```cmake```
 
-* Clone and build jamspell (it includes http server):
+* Clone and build medSpellCheck (it includes http server):
 ```bash
-git clone https://github.com/bakwc/JamSpell.git
-cd JamSpell
+git clone https://github.com/jackneil/medSpellCheck.git
+cd medSpellCheck
 mkdir build
 cd build
 cmake ..
 make
+```
+on Windows replace the 'make' command with:
+```bash
+cmake --build . --target ALL_BUILD --config Release
 ```
 * [Download](#download-models) or [train](#train) language model
 * Run http server:
@@ -265,14 +269,18 @@ To train custom model you need:
 
 1. Install ```cmake```
 
-2. Clone and build jamspell:
+2. Clone and build medSpellCheck:
 ```bash
-git clone https://github.com/bakwc/JamSpell.git
-cd JamSpell
+git clone https://github.com/jackneil/medSpellCheck.git
+cd medSpellCheck
 mkdir build
 cd build
 cmake ..
 make
+```
+* on Windows replace the 'make' command with: (note that the jamspell.exe executable will be located in the /build/main/Release/ folder)
+```bash
+cmake --build . --target ALL_BUILD --config Release
 ```
 
 3. Prepare a utf-8 text file with sentences to train at (eg. [```sherlockholmes.txt```](https://github.com/bakwc/JamSpell/blob/master/test_data/sherlockholmes.txt)) and another file with language alphabet (eg. [```alphabet_en.txt```](https://github.com/bakwc/JamSpell/blob/master/test_data/alphabet_en.txt))
@@ -286,6 +294,9 @@ make
 python evaluate/evaluate.py -a alphabet_file.txt -jsp your_model.bin -mx 50000 your_test_data.txt
 ```
 6. You can use ```evaluate/generate_dataset.py``` to generate you train/test data. It supports txt files, [Leipzig Corpora Collection](http://wortschatz.uni-leipzig.de/en/download/) format and fb2 books.
+
+7. Send it stuff like this: 
+``` curl "http://localhost:55555/candidates?text=This is a 62 yer old femle with high blod pressur and she has had a lap appendectoy by an aneesthesiologist also she has dibetes mellitus. she takes 50mg of metopfolol per day and an 81mg asprin and  15miligram hydrochlorathiozide plus his mother is a smker and has had a bunch of seezures. they like icee creem and pzza. hx of coranary artery dizease and has had a transeent ishcemic attak" ```
 
 ## Download models
 Here is a few simple models. They trained on 300K news + 300k wikipedia sentences. We strongly recommend to train your own model, at least on a few million sentences to achieve better quality. See [Train](#train) section above.
