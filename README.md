@@ -194,6 +194,20 @@ int main(int argc, const char** argv) {
 You can generate extensions for other languages using [swig tutorial](http://www.swig.org/tutorial.html). The swig interface file is `jamspell.i`. Pull requests with build scripts are welcome.
 
 ## HTTP API
+
+### Option 1 - python (via flask)
+* Will run on port 80, open to anyone (not just localhost) by default. 
+* Expects the model to be in the same folder as webserver.py and be named ``` medical_model.bin ``` (since this fork is for the medical spell check)
+* Gives a few more options than the c++ option. Specifically these params can be sent with the GET or POST api call
+  * ```limit``` ... limit number of items per candidate on response from the /candidates endpoint to this i.e. ```/candidates?limit=1&text=blahblah```
+  * ```html``` ... if set, will return a human-readable html table instead of json. Works for /fix and /candidates i.e. ```/fix?html=1&text=blahblah ```
+
+```bash 
+python webserver.py
+ ```
+
+
+### Option 2 - c++ 
 * Install ```cmake```
 
 * Clone and build medSpellCheck (it includes http server):
@@ -299,7 +313,11 @@ python evaluate/evaluate.py -a alphabet_file.txt -jsp your_model.bin -mx 50000 y
 ``` curl "http://localhost:55555/candidates?text=This is a 62 yer old femle with high blod pressur and she has had a lap appendectoy by an aneesthesiologist also she has dibetes mellitus. she takes 50mg of metopfolol per day and an 81mg asprin and  15miligram hydrochlorathiozide plus his mother is a smker and has had a bunch of seezures. they like icee creem and pzza. hx of coranary artery dizease and has had a transeent ishcemic attak" ```
 
 ## Download models
-Here is a few simple models. They trained on 300K news + 300k wikipedia sentences. We strongly recommend to train your own model, at least on a few million sentences to achieve better quality. See [Train](#train) section above.
+Here is our medical model pre-trained on a large medical corpus (a few million records):
+- [medical_model.zip](https://drive.google.com/a/hank.ai/file/d/1c0Ntr99pdAlcn9zmcF1YJZ7_7Z3OrM22/view?usp=sharing) (180mb)
+
+
+Here are a few simple models. They trained on 300K news + 300k wikipedia sentences. We strongly recommend to train your own model, at least on a few million sentences to achieve better quality. See [Train](#train) section above.
 
  - [en.tar.gz](https://github.com/bakwc/JamSpell-models/raw/master/en.tar.gz) (35Mb)
  - [fr.tar.gz](https://github.com/bakwc/JamSpell-models/raw/master/fr.tar.gz) (31Mb)
