@@ -313,7 +313,7 @@ python evaluate/evaluate.py -a alphabet_file.txt -jsp your_model.bin -mx 50000 y
 ``` curl "http://localhost:55555/candidates?text=This is a 62 yer old femle with high blod pressur and she has had a lap appendectoy by an aneesthesiologist also she has dibetes mellitus. she takes 50mg of metopfolol per day and an 81mg asprin and  15miligram hydrochlorathiozide plus his mother is a smker and has had a bunch of seezures. they like icee creem and pzza. hx of coranary artery dizease and has had a transeent ishcemic attak" ```
 
 ## Download models
-Here is our medical model pre-trained on a large medical corpus (a few million records):
+Here is our hank.ai medical model pre-trained on a large medical corpus (a few million records):
 - [medical_model.zip](https://drive.google.com/a/hank.ai/file/d/1c0Ntr99pdAlcn9zmcF1YJZ7_7Z3OrM22/view?usp=sharing) (180mb)
 
 
