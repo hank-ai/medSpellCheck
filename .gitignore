@@ -1,5 +1,4 @@
 .idea/
-*.txt
 *.pyc
 *.aff
 *.dic
@@ -18,3 +17,9 @@ test_data/NOTEEVENTS.csv
 /test_data/pickles
 /test_data/umlsSentences.txt.old
 .vscode/settings.json
+/test_data/noteevents_split
+/test_data/unused
+/test_data/noteevents_sentences.txt
+/test_data/noteevents_clean_gpt2format.txt
+/test_data/noteevents_rows.txt
+test_data/umlsSentences.txt
