@@ -1,4 +1,5 @@
 from flask import Flask, request
+from OpenSSL import SSL
 import jamspell, json
 from json2html import *
 
@@ -17,21 +18,22 @@ def hello():
 @MSC.route("/fix")
 def fix():
     text = request.args.get('text', default = "", type = str)
-    htmlflag = request.args.get('html', default=False, type = bool)
+    htmlflag = request.args.get('html', default=0, type = int)
 
     if text == "":
         return "No text received. Usage: url/fix?html=0&text=texttomedicalspellcheck"
     rval = {}
     rval['input']= text
     rval['results'] = corrector.FixFragment(text)
-    if htmlflag: return json2html.convert(json.dumps(rval))
+    print(htmlflag)
+    if bool(htmlflag): return json2html.convert(json.dumps(rval))
     else: return json.dumps(rval)
 
 @MSC.route("/candidates")
 def candidates():
     text = request.args.get('text', default = "", type = str)
     limit = request.args.get('limit', default = 5, type = int)
-    htmlflag = request.args.get('html', default=False, type = bool)  
+    htmlflag = request.args.get('html', default=0, type = int)  
 
     rval = {}
     rval['input'] = text
@@ -55,10 +57,10 @@ def candidates():
         }
         rval['results'].append(candict)
     print(rval)
-    if htmlflag: return json2html.convert(json.dumps(rval))
+    if bool(htmlflag): return json2html.convert(json.dumps(rval))
     else: json.dumps(rval,indent=2)
 
 
 
 if __name__ == '__main__':
-    MSC.run(debug=True, host='0.0.0.0', port=80)
+    MSC.run(debug=False, host='0.0.0.0', port=80)
