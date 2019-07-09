@@ -8,9 +8,9 @@ corrector.LoadLangModel('model_medical.bin')
 
 MSC = Flask(__name__) #medSpellCheck
 
-formcode = "<form name='checkme' method='get' action=''\n" + \
-    "Enter some medical text:<br><textarea id='text' name='text' rows='10' cols='60'></textarea>\n" + \
-    "<br><br>Limit: <input id='limit' name='limit' type='number' min='1' max='10' value='2' /> <- only applies if 'candidates' selected\n" + \
+formcode = "<form name='checkme' method='get' action=''>\n" + \
+    "Enter some medical text: <font size='-1'>(please enter at least 4 words ... this spellchecker uses context!)</font><br><textarea id='text' name='text' rows='10' cols='60'></textarea>\n" + \
+    "<br><br>Limit: <input id='limit' name='limit' type='number' min='1' max='10' value='2' /> <- only applies if 'candidates' selected as return type\n" + \
     "<br><br>Return type: <select name='route' id='route'><option value='fix'>Fix</option><option value='candidates'>Candidates</option></select>\n" + \
     "<br><br><input type='hidden' name='html' value='1'/><input type='submit' value='Correct It!' /></form>\n\n"
 
@@ -24,7 +24,7 @@ def hello():
     return "<html><head><title>Charting.ai - Medical Spell Check - Powered by Hank Ai, Inc.</title></head>\n" + \
         "<body>Welcome to Medical Spell Check As-A-Service, " + \
         " powered by <a href='https://hank.ai'>Hank AI, Inc.</a><br><br>" + \
-    "For API use my endpoints are: <br>1) charting.ai/fix?html=0&text=i am a medical recrd yes i am. i have dibetes and rumatoid arthritis" + \
+    "My API endpoints are: <br>1) charting.ai/fix?html=0&text=i am a medical recrd yes i am. i have dibetes and rumatoid arthritis" + \
     "<br>2) charting.ai/candidates?html=0&limit=2&text=i am a medical recrd yes i am. i have dibetes and rumatoid arthritis<br><br><br>" + \
     "Or try me out:<br><br>" + formcode
 
