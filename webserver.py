@@ -9,7 +9,10 @@ MSC = Flask(__name__) #medSpellCheck
 
 @MSC.route("/")
 def hello():
-    return "Welcome to the Medical Spell Checker service, powered by by Hank AI, Inc."
+    return "Welcome to Medical Spell Check As-A-Service, " + \
+        " powered by <a href='https://hank.ai'>Hank AI, Inc.</a><br><br>" + \
+    "My endpoints: <br>1) charting.ai/fix?html=false&text=text to spellcheck" + \
+    "<br>2) charting.ai/candidates?html=false&limit=2&text=text to spellcheck"
 
 @MSC.route("/fix")
 def fix():
