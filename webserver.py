@@ -77,4 +77,5 @@ def candidates():
 
 
 if __name__ == '__main__':
-    MSC.run(debug=False, host='0.0.0.0', port=80)
+    context=('../charting_ai.crt','../charting_ai.pem')
+    MSC.run(debug=True, host='0.0.0.0',  port=443, ssl_context=context, threaded=True)
