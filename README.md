@@ -292,10 +292,12 @@ cd build
 cmake ..
 make
 ```
-* on Windows replace the 'make' command with: (note that the jamspell.exe executable will be located in the /build/main/Release/ folder)
-```bash
-cmake --build . --target ALL_BUILD --config Release
-```
+* <b>SPECIAL WINDOWS INSTRUCTIONS</b> for building:
+  1) MUST HAVE <b>Visual Studio 2019 Community Edition</b> (or greater) installed as well as <b>Visual Studio 2019 C++ Build Tools</b>!!!
+  1) ```cmake ..``` will build a shit .exe unless you've followed ^^^
+  1) replace the 'make' command with: (note that the jamspell.exe executable will be located in the /build/main/Release/ folder)<br>
+  ```cmake --build . --target ALL_BUILD --config Release```
+
 
 3. Prepare a utf-8 text file with sentences to train at (eg. [```sherlockholmes.txt```](https://github.com/bakwc/JamSpell/blob/master/test_data/sherlockholmes.txt)) and another file with language alphabet (eg. [```alphabet_en.txt```](https://github.com/bakwc/JamSpell/blob/master/test_data/alphabet_en.txt))
 
