@@ -28,6 +28,17 @@ struct TWord {
     size_t Len = 0;
 };
 
+struct TScoredWord {
+    TScoredWord() = default;
+    TScoredWord(TWord word, double score)
+        : Word(word)
+        , Score(score)
+    {
+    }
+    TWord Word = TWord();
+    double Score = 0;
+};
+
 struct TWordHashPtr {
 public:
   std::size_t operator()(const TWord& x) const {
@@ -36,6 +47,7 @@ public:
 };
 
 using TWords = std::vector<TWord>;
+using TScoredWords = std::vector<TScoredWord>;
 using TSentences = std::vector<TWords>;
 
 class TTokenizer {

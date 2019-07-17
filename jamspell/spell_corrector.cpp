@@ -62,9 +62,9 @@ struct TScoredWord {
     double Score = 0;
 };
 
-TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position) const {
-    if (position >= sentence.size()) {
-        return TWords();
+NJamSpell::TScoredWords TSpellCorrector::GetCandidatesScored(const TWords& sentence, size_t position) const {
+   if (position >= sentence.size()) {
+        return TScoredWords();
     }
 
     TWord w = sentence[position];
@@ -79,7 +79,7 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
     }
 
     if (candidates.empty()) {
-        return candidates;
+        return TScoredWords();
     }
 
     {
@@ -97,8 +97,8 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
 
     FilterCandidatesByFrequency(uniqueCandidates, w);
 
-    std::vector<TScoredWord> scoredCandidates;
-    scoredCandidates.reserve(uniqueCandidates.size());
+    TScoredWords scoredCandidates;
+    //scoredCandidates.reserve(uniqueCandidates.size());
 
     for (TWord cand: uniqueCandidates) {
         TWords candSentence;
@@ -126,15 +126,26 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
                 scored.Score -= UnknownWordsPenalty;
             }
         }
-        scoredCandidates.push_back(scored);
+        scoredCandidates.push_back( {scored.Word, scored.Score} );
     }
 
     std::sort(scoredCandidates.begin(), scoredCandidates.end(), [](TScoredWord w1, TScoredWord w2) {
         return w1.Score > w2.Score;
     });
 
-    candidates.clear();
-    for (auto s: scoredCandidates) {
+    return scoredCandidates;
+
+}
+
+TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position) const {
+    
+    TScoredWords scoredCandidates = GetCandidatesScored(sentence, position);
+    
+    TWords candidates;
+    candidates.reserve(scoredCandidates.size());
+
+    for (auto s: scoredCandidates) { 
+        std::cerr << ">> cand " << WideToUTF8(std::wstring(s.Word.Ptr, s.Word.Len)) << " (score=" << s.Score << ")\n";
         candidates.push_back(s.Word);
     }
     return candidates;
