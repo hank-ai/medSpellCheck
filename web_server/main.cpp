@@ -10,7 +10,7 @@
 std::string GetCandidatesScored(const NJamSpell::TSpellCorrector& corrector,
                           const std::string& text)
 {
-    return corrector.GetALLCandidatesScoredJSON(text)
+    return corrector.GetALLCandidatesScoredJSON(text);
 }
 
 std::string FixText(const NJamSpell::TSpellCorrector& corrector,
