@@ -159,6 +159,7 @@ class SwigPyIterator(_object):
 SwigPyIterator_swigregister = _jamspell.SwigPyIterator_swigregister
 SwigPyIterator_swigregister(SwigPyIterator)
 
+import collections
 class StringVector(_object):
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, StringVector, name, value)
@@ -285,8 +286,17 @@ class TSpellCorrector(_object):
     def TrainLangModel(self, textFile, alphabetFile, modelFile):
         return _jamspell.TSpellCorrector_TrainLangModel(self, textFile, alphabetFile, modelFile)
 
+    def GetCandidatesScoredRaw(self, sentence, position):
+        return _jamspell.TSpellCorrector_GetCandidatesScoredRaw(self, sentence, position)
+
     def GetCandidatesRaw(self, sentence, position):
         return _jamspell.TSpellCorrector_GetCandidatesRaw(self, sentence, position)
+
+    def GetALLCandidatesScoredJSON(self, text):
+        return _jamspell.TSpellCorrector_GetALLCandidatesScoredJSON(self, text)
+
+    def GetCandidatesScored(self, sentence, position):
+        return _jamspell.TSpellCorrector_GetCandidatesScored(self, sentence, position)
 
     def GetCandidates(self, sentence, position):
         return _jamspell.TSpellCorrector_GetCandidates(self, sentence, position)
