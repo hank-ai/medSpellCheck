@@ -13,3 +13,5 @@
 /.vs
 /build
 /jamspell.egg-info
+.vscode/settings.json
+jamspell_wrap.cpp
