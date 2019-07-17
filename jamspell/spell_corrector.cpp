@@ -465,7 +465,7 @@ void TSpellCorrector::PrepareCache() {
     size_t avgWordLen = std::max(int(double(s) / n) + 1, 1);
     size_t avgWordLenMinusOne = std::max(size_t(1), avgWordLen - 1);
 
-    std::cerr << "[info] average word length " << avgWordLen << std::endl;
+    std::cerr << "  average word length " << avgWordLen << std::endl;
 
     uint64_t deletes1size = wordToId.size() * avgWordLen;
     uint64_t deletes2size = wordToId.size() * avgWordLen * avgWordLenMinusOne;
@@ -480,7 +480,10 @@ void TSpellCorrector::PrepareCache() {
     uint64_t deletes2real = 0;
 
     std::cerr << "  starting loop 2\n";
+    n = 0;
     for (auto&& it: wordToId) {
+        n += 1;
+        std::cerr << "    " << n << "/" << wordToId.size() << " complete\r";
         auto deletes = GetDeletes2(it.first);
         for (auto&& w1: deletes) {
             Deletes1->Insert(WideToUTF8(w1.back()));
