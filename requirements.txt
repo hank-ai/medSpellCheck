@@ -1,0 +1,6 @@
+Cython==0.29.10
+Flask==1.1.0
+jamspell==0.0.11
+regex==2017.4.5
+requests==2.21.0
+urllib3==1.24.3
