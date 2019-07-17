@@ -4,7 +4,7 @@ import jamspell, json, re
 from json2html import *
 
 corrector = jamspell.TSpellCorrector()
-corrector.LoadLangModel('model_medical.bin')
+corrector.LoadLangModel('c:/_aidata/medSpellCheck/model_medical.bin')
 
 MSC = Flask(__name__) #medSpellCheck
 
@@ -54,28 +54,15 @@ def candidates():
     runningOffset=0
     if text == "":
         return "No text received. Usage: url/candidates?html=0&limit=2&text=texttomedicalspellcheck"
-    rval['results'] = []
-    words = re.compile('\w+').findall(text) #text.split()
-    index = text.index
-    for i, word in enumerate(words):
-        wordOffset = index(word, runningOffset)
-        runningOffset = wordOffset + len(word)
-        cands = corrector.GetCandidates(words, i)
-        if len(cands) == 0: continue
-        #if word.lower() in [x.lower() for x in cands[:2]]: continue
-        if word.lower() == cands[0].lower(): continue
-        candict = {'candidates': cands[:limit],
-        'len': len(word),
-        'pos_from': wordOffset
-        }
-        rval['results'].append(candict)
-    print(rval)
-    if len(rval['results'])==0: rval['results']='CORRECT'
+    respJSONstring = corrector.GetALLCandidatesScoredJSON(text)
+    #print(respJSONstring)
+    rval = json.loads(respJSONstring) 
+    if 'results' not in rval.keys() or len(rval['results'])==0: rval['results']='CORRECT'
     if bool(htmlflag): return json2html.convert(json.dumps(rval)) + "<br><br><br>Try me out: <br><br>" + formcode
     else: return json.dumps(rval,indent=2)
 
 
 
 if __name__ == '__main__':
-    context=('../charting_ai.crt','../charting_ai.pem')
+    context=('c:/charting_ai.crt', 'c:/charting_ai.pem')
     MSC.run(debug=True, host='0.0.0.0',  port=443, ssl_context=context, threaded=True)
