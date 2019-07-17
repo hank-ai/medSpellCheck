@@ -2,47 +2,15 @@
 #include "contrib/httplib/httplib.h"
 #include "contrib/nlohmann/json.hpp"
 #include <cwctype>
+//#include "contrib/libssl64MT.lib"
+//#include <libcrypto>
 
-std::string GetCandidates(const NJamSpell::TSpellCorrector& corrector,
+#define CPPHTTPLIB_OPENSSL_SUPPORT
+
+std::string GetCandidatesScored(const NJamSpell::TSpellCorrector& corrector,
                           const std::string& text)
 {
-    std::wstring input = NJamSpell::UTF8ToWide(text);
-    std::transform(input.begin(), input.end(), input.begin(), std::towlower);
-    NJamSpell::TSentences sentences = corrector.GetLangModel().Tokenize(input);
-
-    nlohmann::json results;
-    results["results"] = nlohmann::json::array();
-
-    for (size_t i = 0; i < sentences.size(); ++i) {
-        const NJamSpell::TWords& sentence = sentences[i];
-        for (size_t j = 0; j < sentence.size(); ++j) {
-            NJamSpell::TWord currWord = sentence[j];
-            std::wstring wCurrWord(currWord.Ptr, currWord.Len);
-            NJamSpell::TWords candidates = corrector.GetCandidatesRaw(sentence, j);
-            if (candidates.empty()) {
-                continue;
-            }
-            std::wstring firstCandidate(candidates[0].Ptr, candidates[0].Len);
-            if (wCurrWord == firstCandidate) {
-                continue;
-            }
-            nlohmann::json currentResult;
-            currentResult["pos_from"] = currWord.Ptr - &input[0];
-            currentResult["len"] = currWord.Len;
-            currentResult["candidates"] = nlohmann::json::array();
-
-            size_t candidatesSize = std::min(candidates.size(), size_t(7));
-            for (size_t k = 0; k < candidatesSize; ++k) {
-                NJamSpell::TWord candidate = candidates[k];
-                std::string candidateStr = NJamSpell::WideToUTF8(std::wstring(candidate.Ptr, candidate.Len));
-                currentResult["candidates"].push_back(candidateStr);
-            }
-
-            results["results"].push_back(currentResult);
-        }
-    }
-
-    return results.dump(4);
+    return corrector.GetALLCandidatesScoredJSON(text)
 }
 
 std::string FixText(const NJamSpell::TSpellCorrector& corrector,
@@ -53,14 +21,24 @@ std::string FixText(const NJamSpell::TSpellCorrector& corrector,
 }
 
 int main(int argc, const char** argv) {
-    if (argc != 4) {
-        std::cerr << "Usage: " << argv[0] << " model.bin localhost 8080\n";
+    if (argc < 4 || argc > 7) {
+        std::cerr << "(error) Arg count = " << argc << std::endl;
+        std::cerr << "Usage: " << argv[0] << " model.bin localhost 8080 [sslcertpath] [sslkeypath]\n";
+        std::cerr << "   Note: SSL isn't currently working tho\n";
         return 42;
     }
 
     std::string modelFile = argv[1];
     std::string hostname = argv[2];
     int port = std::stoi(argv[3]);
+    std::string sslcert;
+    std::string sslkey;
+    if(argc == 6) {
+        sslcert = argv[4];
+        sslkey = argv[5];
+        std::cerr << "[info] received ssl request (" << sslcert << " | " << sslkey << ")\n";
+    }
+
 
     NJamSpell::TSpellCorrector corrector;
     std::cerr << "[info] loading model" << std::endl;
@@ -69,7 +47,11 @@ int main(int argc, const char** argv) {
         return 42;
     }
 
-    httplib::Server srv;
+    //if (argc < 6){ 
+        httplib::Server srv; 
+    //    }
+    //else { httplib::SSLServer srv(sslcert, sslkey)}
+    
     srv.Get("/fix", [&corrector](const httplib::Request& req, httplib::Response& resp) {
         resp.set_content(FixText(corrector, req.get_param_value("text")) + "\n", "text/plain");
     });
@@ -79,11 +61,11 @@ int main(int argc, const char** argv) {
     });
 
     srv.Get("/candidates", [&corrector](const httplib::Request& req, httplib::Response& resp) {
-        resp.set_content(GetCandidates(corrector, req.get_param_value("text")) + "\n", "text/plain");
+        resp.set_content(GetCandidatesScored(corrector, req.get_param_value("text")) + "\n", "text/plain");
     });
 
     srv.Post("/candidates", [&corrector](const httplib::Request& req, httplib::Response& resp) {
-        resp.set_content(GetCandidates(corrector, req.body) + "\n", "text/plain");
+        resp.set_content(GetCandidatesScored(corrector, req.body) + "\n", "text/plain");
     });
 
     std::cerr << "[info] starting web server at " << hostname << ":" << port << std::endl;
