@@ -10,3 +10,7 @@
 *.tar.gz
 *.spell
 *.cache
+/dist
+/.vs
+/build
+/jamspell.egg-info
