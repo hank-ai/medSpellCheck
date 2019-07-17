@@ -450,9 +450,11 @@ void TSpellCorrector::Inserts2(const std::wstring& w, TWords& result) const {
 }
 
 void TSpellCorrector::PrepareCache() {
+    std::cerr << "[info] preparing cache" << std::endl;
     auto&& wordToId = LangModel.GetWordToId();
     size_t n = 0;
     size_t s = 0;
+    std::cerr << "  starting loop 1\n"; 
     for (auto&& it: wordToId) {
         n += 1;
         s += it.first.size();
@@ -462,6 +464,8 @@ void TSpellCorrector::PrepareCache() {
     }
     size_t avgWordLen = std::max(int(double(s) / n) + 1, 1);
     size_t avgWordLenMinusOne = std::max(size_t(1), avgWordLen - 1);
+
+    std::cerr << "[info] average word length " << avgWordLen << std::endl;
 
     uint64_t deletes1size = wordToId.size() * avgWordLen;
     uint64_t deletes2size = wordToId.size() * avgWordLen * avgWordLenMinusOne;
@@ -475,6 +479,7 @@ void TSpellCorrector::PrepareCache() {
     uint64_t deletes1real = 0;
     uint64_t deletes2real = 0;
 
+    std::cerr << "  starting loop 2\n";
     for (auto&& it: wordToId) {
         auto deletes = GetDeletes2(it.first);
         for (auto&& w1: deletes) {
@@ -486,12 +491,14 @@ void TSpellCorrector::PrepareCache() {
             }
         }
     }
+    std::cerr << "[info] cache preparation complete\n";
 }
 
 constexpr uint64_t SPELL_CHECKER_CACHE_MAGIC_BYTE = 3811558393781437494L;
 constexpr uint16_t SPELL_CHECKER_CACHE_VERSION = 1;
 
 bool TSpellCorrector::LoadCache(const std::string& cacheFile) {
+    std::cerr << "[info] loading cache\n";
     std::ifstream in(cacheFile, std::ios::binary);
     if (!in.is_open()) {
         return false;
@@ -526,6 +533,7 @@ bool TSpellCorrector::LoadCache(const std::string& cacheFile) {
 }
 
 bool TSpellCorrector::SaveCache(const std::string& cacheFile) {
+    std::cerr << "[info] saving cache\n";
     std::ofstream out(cacheFile, std::ios::binary);
     if (!out.is_open()) {
         return false;
