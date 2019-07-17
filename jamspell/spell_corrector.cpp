@@ -1,5 +1,7 @@
 #include <algorithm>
 #include <fstream>
+#include "contrib/nlohmann/json.hpp"
+#include <cwctype>
 
 #include "spell_corrector.hpp"
 
@@ -57,12 +59,7 @@ bool TSpellCorrector::TrainLangModel(const std::string& textFile, const std::str
     return true;
 }
 
-struct TScoredWord {
-    TWord Word;
-    double Score = 0;
-};
-
-NJamSpell::TScoredWords TSpellCorrector::GetCandidatesScored(const TWords& sentence, size_t position) const {
+TScoredWords TSpellCorrector::GetCandidatesScoredRaw(const TWords& sentence, size_t position) const {
    if (position >= sentence.size()) {
         return TScoredWords();
     }
@@ -126,7 +123,7 @@ NJamSpell::TScoredWords TSpellCorrector::GetCandidatesScored(const TWords& sente
                 scored.Score -= UnknownWordsPenalty;
             }
         }
-        scoredCandidates.push_back( {scored.Word, scored.Score} );
+        scoredCandidates.push_back(scored); // {scored.Word, scored.Score} );
     }
 
     std::sort(scoredCandidates.begin(), scoredCandidates.end(), [](TScoredWord w1, TScoredWord w2) {
@@ -139,7 +136,7 @@ NJamSpell::TScoredWords TSpellCorrector::GetCandidatesScored(const TWords& sente
 
 TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position) const {
     
-    TScoredWords scoredCandidates = GetCandidatesScored(sentence, position);
+    TScoredWords scoredCandidates = GetCandidatesScoredRaw(sentence, position);
     
     TWords candidates;
     candidates.reserve(scoredCandidates.size());
@@ -171,6 +168,69 @@ void TSpellCorrector::FilterCandidatesByFrequency(std::unordered_set<TWord, TWor
         uniqueCandidates.insert(candidateCounts[i].second);
     }
     uniqueCandidates.insert(origWord);
+}
+
+//takes a string sentence as input, returns a json string of scored candidates as output
+TScoredWords TSpellCorrector::GetCandidatesScored(const std::vector<std::wstring>& sentence, size_t position) const {
+    TWords words;
+    for (auto&& w: sentence) {
+        words.push_back(TWord(w));
+    }
+    TScoredWords candidates = GetCandidatesScoredRaw(words, position);
+    return candidates;
+    /* std::vector<std::wstring> results;
+    for (auto&& c: candidates) {
+        results.push_back(std::wstring(c.Ptr, c.Len));
+    }
+    return results;    */
+
+}
+
+// this takes a string as an input and returns json as string
+// returns ALL detected misspellings along with scores, locations, and candidates
+std::string TSpellCorrector::GetALLCandidatesScoredJSON(const std::string& text) const {
+    std::wstring input = NJamSpell::UTF8ToWide(text);
+    std::transform(input.begin(), input.end(), input.begin(), std::towlower);
+    NJamSpell::TSentences sentences = LangModel.Tokenize(input);
+
+    nlohmann::json results;
+    results["results"] = nlohmann::json::array();
+
+    for (size_t i = 0; i < sentences.size(); ++i) {
+        const NJamSpell::TWords& sentence = sentences[i];
+        for (size_t j = 0; j < sentence.size(); ++j) {
+            NJamSpell::TWord currWord = sentence[j];
+            std::wstring wCurrWord(currWord.Ptr, currWord.Len);
+            //std::cerr << "  word " << NJamSpell::WideToUTF8(wCurrWord) << std::endl;
+            NJamSpell::TScoredWords candidates = GetCandidatesScoredRaw(sentence, j);
+            if (candidates.empty()) {
+                continue;
+            }
+            std::wstring firstCandidate(candidates[0].Word.Ptr, candidates[0].Word.Len);
+            if (wCurrWord == firstCandidate) { //i.e. the input word was correctly spelled
+                continue;
+            }
+            nlohmann::json currentResult;
+            currentResult["pos_from"] = currWord.Ptr - &input[0];
+            currentResult["len"] = currWord.Len;
+            currentResult["candidates"] = nlohmann::json::array();
+            currentResult["original"] = NJamSpell::WideToUTF8(wCurrWord);
+
+            size_t candidatesSize = std::min(candidates.size(), size_t(7));
+            for (size_t k = 0; k < candidatesSize; ++k) {
+                nlohmann::json cand;
+                NJamSpell::TScoredWord candidate = candidates[k];
+                std::string candidateStr = NJamSpell::WideToUTF8(std::wstring(candidate.Word.Ptr, candidate.Word.Len));
+                cand["candidate"] = candidateStr;
+                cand["score"] = candidate.Score;
+                currentResult["candidates"].push_back(cand);
+            }
+
+            results["results"].push_back(currentResult);
+        }
+    }
+
+    return results.dump(4);
 }
 
 std::vector<std::wstring> TSpellCorrector::GetCandidates(const std::vector<std::wstring>& sentence, size_t position) const {

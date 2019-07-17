@@ -35,7 +35,7 @@ struct TScoredWord {
         , Score(score)
     {
     }
-    TWord Word = TWord();
+    TWord Word;
     double Score = 0;
 };
 
@@ -51,18 +51,18 @@ using TScoredWords = std::vector<TScoredWord>;
 using TSentences = std::vector<TWords>;
 
 class TTokenizer {
-public:
-    TTokenizer();
-    bool LoadAlphabet(const std::string& alphabetFile);
-    TSentences Process(const std::wstring& originalText) const;
-    void Clear();
+    public:
+        TTokenizer();
+        bool LoadAlphabet(const std::string& alphabetFile);
+        TSentences Process(const std::wstring& originalText) const;
+        void Clear();
 
-    const std::unordered_set<wchar_t>& GetAlphabet() const;
+        const std::unordered_set<wchar_t>& GetAlphabet() const;
 
-    HANDYPACK(Alphabet)
-private:
-    std::unordered_set<wchar_t> Alphabet;
-    std::locale Locale;
+        HANDYPACK(Alphabet);
+    private:
+        std::unordered_set<wchar_t> Alphabet;
+        std::locale Locale;
 };
 
 std::string LoadFile(const std::string& fileName);
