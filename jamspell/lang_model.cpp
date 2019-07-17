@@ -105,11 +105,17 @@ bool TLangModel::Train(const std::string& fileName, const std::string& alphabetF
     }
     std::wstring trainText = UTF8ToWide(LoadFile(fileName));
     ToLower(trainText);
+    
+    std::cerr << "[info] done loading text. tokenizing sentences now" << std::endl;
+
     TSentences sentences = Tokenizer.Process(trainText);
     if (sentences.empty()) {
         std::cerr << "[error] no sentences" << std::endl;
         return false;
     }
+    std::cerr << "[info] " << sentences.size() << " sentences loaded" << std::endl;
+
+    std::cerr << "[info] converting to ids" << std::endl;
 
     TIdSentences sentenceIds = ConvertToIds(sentences);
 
