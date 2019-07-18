@@ -6,7 +6,7 @@ from json2html import *
 print('Starting up ...')
 corrector = jamspell.TSpellCorrector()
 print('Loading medical model ...')
-corrector.LoadLangModel('c:/_aidata/medSpellCheck/model_medical.v1.bin')
+corrector.LoadLangModel('c:/_aidata/medSpellCheck/model_medical_FULL.bin')
 
 MSC = Flask(__name__) #medSpellCheck
 

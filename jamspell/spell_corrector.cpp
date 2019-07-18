@@ -2,11 +2,13 @@
 #include <fstream>
 #include "contrib/nlohmann/json.hpp"
 #include <cwctype>
+#include <exception>
 
 #include "spell_corrector.hpp"
 
 namespace NJamSpell {
 
+const std::string VERSION = "1.1a";
 
 static std::vector<std::wstring> GetDeletes1(const std::wstring& w) {
     std::vector<std::wstring> results;
@@ -33,6 +35,7 @@ static std::vector<std::vector<std::wstring>> GetDeletes2(const std::wstring& w)
 }
 
 bool TSpellCorrector::LoadLangModel(const std::string& modelFile) {
+    std::cerr << "[info] medSpellCheck v" << VERSION << ". Based on jamspell.\n";
     if (!LangModel.Load(modelFile)) {
         return false;
     }
@@ -483,16 +486,31 @@ void TSpellCorrector::PrepareCache() {
     n = 0;
     for (auto&& it: wordToId) {
         n += 1;
-        std::cerr << "    " << n << "/" << wordToId.size() << " complete\r";
-        auto deletes = GetDeletes2(it.first);
-        for (auto&& w1: deletes) {
-            Deletes1->Insert(WideToUTF8(w1.back()));
-            deletes1real += 1;
-            for (size_t i = 0; i < w1.size() - 1; ++i) {
-                Deletes2->Insert(WideToUTF8(w1[i]));
-                deletes2real += 1;
+        try{
+            std::cerr << "    " << n << "/" << wordToId.size() << " complete\r";
+            auto deletes = GetDeletes2(it.first);
+            for (auto&& w1: deletes) {
+                try{
+                    Deletes1->Insert(WideToUTF8(w1.back()));
+                    deletes1real += 1;
+                    for (size_t i = 0; i < w1.size() - 1; ++i) {
+                        try{
+                            Deletes2->Insert(WideToUTF8(w1[i]));
+                            deletes2real += 1;
+                        }
+                        catch(const std::runtime_error& re) { std::cerr << "[error] [922] Runtime error caught: " << re.what() << "\n";}
+                        catch(const std::exception& ex){ std::cerr << "[error] [921] Error caught: " << ex.what() << "\n";}
+                        catch(...){ std::cerr << "[error] [920] Unknown exception caught in middle cache prep loop. Continuing" << "\n"; }
+                    }
+                }
+                catch(const std::runtime_error& re) { std::cerr << "[error] [912] Runtime error caught: " << re.what() << "\n"; }
+                catch(const std::exception& ex){ std::cerr << "[error] [911] Error caught: " << ex.what() << "\n"; }
+                catch(...){ std::cerr << "[error] [910] Unknown exception caught in middle cache prep loop. Continuing" << "\n"; }
             }
         }
+        catch(const std::runtime_error& re) { std::cerr << "[error] [902] Runtime error caught: " << re.what() << "\n";}
+        catch(const std::exception& ex){ std::cerr << "[error] [901] Error caught: " << ex.what() << "\n";}
+        catch(...){std::cerr << "[error] [900] Unknown exception caught in outer cache prep loop. Continuing. n="<< n << "\n"; } 
     }
     std::cerr << "[info] cache preparation complete\n";
 }
