@@ -325,7 +325,7 @@ void TSpellCorrector::SetPenalty(double knownWordsPenaly, double unknownWordsPen
 }
 
 void TSpellCorrector::SetMaxCandiatesToCheck(size_t maxCandidatesToCheck) {
-    MaxCandiatesToCheck = maxCandidatesToCheck;
+    MaxCandidatesToCheck = maxCandidatesToCheck;
 }
 
 const TLangModel& TSpellCorrector::GetLangModel() const {
