@@ -41,7 +41,6 @@ int main(int argc, const char** argv) {
 
 
     NJamSpell::TSpellCorrector corrector;
-    std::cerr << "[info] loading model" << std::endl;
     if (!corrector.LoadLangModel(modelFile)) {
         std::cerr << "[error] failed to load model" << std::endl;
         return 42;

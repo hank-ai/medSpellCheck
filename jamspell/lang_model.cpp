@@ -244,6 +244,8 @@ bool TLangModel::Dump(const std::string& modelFileName) const {
 }
 
 bool TLangModel::Load(const std::string& modelFileName) {
+    std::cerr << "[info] loading model (" << modelFileName << ")\n";
+
     std::ifstream in(modelFileName, std::ios::binary);
     if (!in.is_open()) {
         return false;

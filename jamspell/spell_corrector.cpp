@@ -519,7 +519,7 @@ constexpr uint64_t SPELL_CHECKER_CACHE_MAGIC_BYTE = 3811558393781437494L;
 constexpr uint16_t SPELL_CHECKER_CACHE_VERSION = 1;
 
 bool TSpellCorrector::LoadCache(const std::string& cacheFile) {
-    std::cerr << "[info] loading cache\n";
+    std::cerr << "[info] loading cache (" << cacheFile << ")\n";
     std::ifstream in(cacheFile, std::ios::binary);
     if (!in.is_open()) {
         return false;
@@ -554,7 +554,7 @@ bool TSpellCorrector::LoadCache(const std::string& cacheFile) {
 }
 
 bool TSpellCorrector::SaveCache(const std::string& cacheFile) {
-    std::cerr << "[info] saving cache\n";
+    std::cerr << "[info] saving cache (" << cacheFile << ")\n";
     std::ofstream out(cacheFile, std::ios::binary);
     if (!out.is_open()) {
         return false;
@@ -568,6 +568,7 @@ bool TSpellCorrector::SaveCache(const std::string& cacheFile) {
     Deletes1->Dump(out);
     Deletes2->Dump(out);
     NHandyPack::Dump(out, SPELL_CHECKER_CACHE_MAGIC_BYTE);
+    std::cerr << "[info] cache saved\n";
     return true;
 }
 
