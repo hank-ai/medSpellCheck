@@ -152,7 +152,7 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
 }
 
 void TSpellCorrector::FilterCandidatesByFrequency(std::unordered_set<TWord, TWordHashPtr>& uniqueCandidates, TWord origWord) const {
-    if (uniqueCandidates.size() <= MaxCandiatesToCheck) {
+    if (uniqueCandidates.size() <= MaxCandidatesToCheck) {
         return;
     }
 
@@ -167,7 +167,7 @@ void TSpellCorrector::FilterCandidatesByFrequency(std::unordered_set<TWord, TWor
         return a.first > b.first;
     });
 
-    for (size_t i = 0; i < MaxCandiatesToCheck; ++ i) {
+    for (size_t i = 0; i < MaxCandidatesToCheck; ++ i) {
         uniqueCandidates.insert(candidateCounts[i].second);
     }
     uniqueCandidates.insert(origWord);

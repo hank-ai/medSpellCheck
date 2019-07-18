@@ -37,7 +37,7 @@ private:
     std::unique_ptr<TBloomFilter> Deletes2;
     double KnownWordsPenalty = 20.0;
     double UnknownWordsPenalty = 5.0;
-    size_t MaxCandiatesToCheck = 14;
+    size_t MaxCandidatesToCheck = 14;
 };
 
 
