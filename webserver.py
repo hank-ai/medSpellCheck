@@ -3,8 +3,10 @@ from OpenSSL import SSL
 import jamspell, json, re
 from json2html import *
 
+print('Starting up ...')
 corrector = jamspell.TSpellCorrector()
-corrector.LoadLangModel('c:/_aidata/medSpellCheck/model_medical.bin')
+print('Loading medical model ...')
+corrector.LoadLangModel('c:/_aidata/medSpellCheck/model_medical.v1.bin')
 
 MSC = Flask(__name__) #medSpellCheck
 
@@ -55,8 +57,10 @@ def candidates():
     if text == "":
         return "No text received. Usage: url/candidates?html=0&limit=2&text=texttomedicalspellcheck"
     respJSONstring = corrector.GetALLCandidatesScoredJSON(text)
-    #print(respJSONstring)
+    print(respJSONstring)
     rval = json.loads(respJSONstring) 
+    for result in rval['results']:
+        result['candidates'] = result['candidates'][:limit]
     if 'results' not in rval.keys() or len(rval['results'])==0: rval['results']='CORRECT'
     if bool(htmlflag): return json2html.convert(json.dumps(rval)) + "<br><br><br>Try me out: <br><br>" + formcode
     else: return json.dumps(rval,indent=2)
