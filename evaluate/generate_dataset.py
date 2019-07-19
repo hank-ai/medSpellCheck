@@ -9,7 +9,7 @@ import xml.sax
 from collections import defaultdict
 
 RANDOM_SEED = 42
-TRAIN_TEST_SPLIT = 0.95
+TRAIN_TEST_SPLIT = 0.97
 LANG_DETECT_FRAGMENT_SIZE = 2000
 
 
