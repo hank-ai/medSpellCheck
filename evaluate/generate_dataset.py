@@ -108,9 +108,9 @@ class TxtDataSource(DataSource):
         return pathToFile.endswith('.txt')
 
     def loadSentences(self, pathToFile, sentences): 
-        print('calculating line count in {}'.format(pathToFile))   
+        print('[info] calculating line count in {}'.format(pathToFile))   
         numlines = sum(1 for x in open(pathToFile))
-        print('total lines: {:,}'.format(numlines))
+        print('[info] total lines: {:,}'.format(numlines))
         outMod = int(numlines/10)
         with codecs.open(pathToFile, 'r', 'utf-8') as f:
             for i, line in enumerate(f.read().split('\n')):
@@ -169,10 +169,10 @@ def processSentences(sentences, outFile):
     trainSentences = sentences[:trainHalf]
     testSentences = sentences[trainHalf:]
 
-    print('[info] saving train set')
+    print('[info] saving train set ({})'.format(len(trainSentences)))
     saveSentences(trainSentences, outFile + '_train.txt')
 
-    print('[info] saving test set')
+    print('[info] saving test set ({})'.format(len(testSentences)))
     saveSentences(testSentences, outFile + '_test.txt')
 
     print('[info] done')
