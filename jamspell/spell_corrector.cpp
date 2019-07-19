@@ -324,7 +324,7 @@ void TSpellCorrector::SetPenalty(double knownWordsPenaly, double unknownWordsPen
     UnknownWordsPenalty = unknownWordsPenalty;
 }
 
-void TSpellCorrector::SetMaxCandiatesToCheck(size_t maxCandidatesToCheck) {
+void TSpellCorrector::SetMaxCandidatesToCheck(size_t maxCandidatesToCheck) {
     MaxCandidatesToCheck = maxCandidatesToCheck;
 }
 
