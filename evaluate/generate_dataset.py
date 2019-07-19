@@ -107,9 +107,14 @@ class TxtDataSource(DataSource):
     def isMatch(self, pathToFile):
         return pathToFile.endswith('.txt')
 
-    def loadSentences(self, pathToFile, sentences):
+    def loadSentences(self, pathToFile, sentences): 
+        print('calculating line count in {}'.format(pathToFile))   
+        numlines = sum(1 for x in open(pathToFile))
+        print('total lines: {:,}'.format(numlines))
+        outMod = int(numlines/10)
         with codecs.open(pathToFile, 'r', 'utf-8') as f:
-            for line in f.read().split('\n'):
+            for i, line in enumerate(f.read().split('\n')):
+                if i%outMod==0: print("  {:,}/{:,}".format(i, numlines))
                 line = line.strip().lower()
                 if not line:
                     continue
