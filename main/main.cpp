@@ -45,7 +45,7 @@ int Score(const std::string& modelFile) {
 
 int ScoredCands(const std::string& modelFile) {
     TSpellCorrector corrector;
-    std::cerr << "[info] loading model" << std::endl;
+    //std::cerr << "[info] loading model" << std::endl;
     if (!corrector.LoadLangModel(modelFile)) {
         std::cerr << "[error] failed to load model" << std::endl;
         return 42;
