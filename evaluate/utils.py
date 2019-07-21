@@ -3,7 +3,7 @@
 
 import codecs
 
-ALPHABET = 'abcdefghijklmnopqrstuvwxyz'
+ALPHABET = "abcdefghijklmnopqrstuvwxyz'-"
 
 def normalize(text):
     letters = []
