@@ -260,6 +260,8 @@ def main():
     print('[info] loading text')
     originalText = loadText(args.file)
     originalTextLen = len(list(originalText))
+    
+    print('[info] total words: %d' % len(originalText))
 
     print('[info] generating typos')
     erroredText = generateTypos(originalText)
@@ -275,7 +277,6 @@ def main():
     # for s in originalSentences[:50]:
     #    print ' '.join(s) + '.'
 
-    print('[info] total words: %d' % len(originalText))
     print('[info] evaluating')
 
     results = {}
