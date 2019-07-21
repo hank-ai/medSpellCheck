@@ -145,7 +145,7 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
     candidates.reserve(scoredCandidates.size());
 
     for (auto s: scoredCandidates) { 
-        std::cerr << ">> cand " << WideToUTF8(std::wstring(s.Word.Ptr, s.Word.Len)) << " (score=" << s.Score << ")\n";
+        //std::cerr << ">> cand " << WideToUTF8(std::wstring(s.Word.Ptr, s.Word.Len)) << " (score=" << s.Score << ")\n";
         candidates.push_back(s.Word);
     }
     return candidates;
