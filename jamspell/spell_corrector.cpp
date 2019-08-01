@@ -1,10 +1,14 @@
 #include <algorithm>
 #include <fstream>
+#include "contrib/nlohmann/json.hpp"
+#include <cwctype>
+#include <exception>
 
 #include "spell_corrector.hpp"
 
 namespace NJamSpell {
 
+const std::string VERSION = "1.1a";
 
 static std::vector<std::wstring> GetDeletes1(const std::wstring& w) {
     std::vector<std::wstring> results;
@@ -31,6 +35,7 @@ static std::vector<std::vector<std::wstring>> GetDeletes2(const std::wstring& w)
 }
 
 bool TSpellCorrector::LoadLangModel(const std::string& modelFile) {
+    std::cerr << "[info] medSpellCheck v" << VERSION << ". Based on jamspell.\n";
     if (!LangModel.Load(modelFile)) {
         return false;
     }
@@ -57,14 +62,9 @@ bool TSpellCorrector::TrainLangModel(const std::string& textFile, const std::str
     return true;
 }
 
-struct TScoredWord {
-    TWord Word;
-    double Score = 0;
-};
-
-TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position) const {
-    if (position >= sentence.size()) {
-        return TWords();
+TScoredWords TSpellCorrector::GetCandidatesScoredRaw(const TWords& sentence, size_t position) const {
+   if (position >= sentence.size()) {
+        return TScoredWords();
     }
 
     TWord w = sentence[position];
@@ -79,7 +79,7 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
     }
 
     if (candidates.empty()) {
-        return candidates;
+        return TScoredWords();
     }
 
     {
@@ -97,8 +97,8 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
 
     FilterCandidatesByFrequency(uniqueCandidates, w);
 
-    std::vector<TScoredWord> scoredCandidates;
-    scoredCandidates.reserve(uniqueCandidates.size());
+    TScoredWords scoredCandidates;
+    //scoredCandidates.reserve(uniqueCandidates.size());
 
     for (TWord cand: uniqueCandidates) {
         TWords candSentence;
@@ -126,22 +126,33 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
                 scored.Score -= UnknownWordsPenalty;
             }
         }
-        scoredCandidates.push_back(scored);
+        scoredCandidates.push_back(scored); // {scored.Word, scored.Score} );
     }
 
     std::sort(scoredCandidates.begin(), scoredCandidates.end(), [](TScoredWord w1, TScoredWord w2) {
         return w1.Score > w2.Score;
     });
 
-    candidates.clear();
-    for (auto s: scoredCandidates) {
+    return scoredCandidates;
+
+}
+
+TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position) const {
+    
+    TScoredWords scoredCandidates = GetCandidatesScoredRaw(sentence, position);
+    
+    TWords candidates;
+    candidates.reserve(scoredCandidates.size());
+
+    for (auto s: scoredCandidates) { 
+        std::cerr << ">> cand " << WideToUTF8(std::wstring(s.Word.Ptr, s.Word.Len)) << " (score=" << s.Score << ")\n";
         candidates.push_back(s.Word);
     }
     return candidates;
 }
 
 void TSpellCorrector::FilterCandidatesByFrequency(std::unordered_set<TWord, TWordHashPtr>& uniqueCandidates, TWord origWord) const {
-    if (uniqueCandidates.size() <= MaxCandiatesToCheck) {
+    if (uniqueCandidates.size() <= MaxCandidatesToCheck) {
         return;
     }
 
@@ -156,10 +167,73 @@ void TSpellCorrector::FilterCandidatesByFrequency(std::unordered_set<TWord, TWor
         return a.first > b.first;
     });
 
-    for (size_t i = 0; i < MaxCandiatesToCheck; ++ i) {
+    for (size_t i = 0; i < MaxCandidatesToCheck; ++ i) {
         uniqueCandidates.insert(candidateCounts[i].second);
     }
     uniqueCandidates.insert(origWord);
+}
+
+//takes a string sentence as input, returns a json string of scored candidates as output
+TScoredWords TSpellCorrector::GetCandidatesScored(const std::vector<std::wstring>& sentence, size_t position) const {
+    TWords words;
+    for (auto&& w: sentence) {
+        words.push_back(TWord(w));
+    }
+    TScoredWords candidates = GetCandidatesScoredRaw(words, position);
+    return candidates;
+    /* std::vector<std::wstring> results;
+    for (auto&& c: candidates) {
+        results.push_back(std::wstring(c.Ptr, c.Len));
+    }
+    return results;    */
+
+}
+
+// this takes a string as an input and returns json as string
+// returns ALL detected misspellings along with scores, locations, and candidates
+std::string TSpellCorrector::GetALLCandidatesScoredJSON(const std::string& text) const {
+    std::wstring input = NJamSpell::UTF8ToWide(text);
+    std::transform(input.begin(), input.end(), input.begin(), std::towlower);
+    NJamSpell::TSentences sentences = LangModel.Tokenize(input);
+
+    nlohmann::json results;
+    results["results"] = nlohmann::json::array();
+
+    for (size_t i = 0; i < sentences.size(); ++i) {
+        const NJamSpell::TWords& sentence = sentences[i];
+        for (size_t j = 0; j < sentence.size(); ++j) {
+            NJamSpell::TWord currWord = sentence[j];
+            std::wstring wCurrWord(currWord.Ptr, currWord.Len);
+            //std::cerr << "  word " << NJamSpell::WideToUTF8(wCurrWord) << std::endl;
+            NJamSpell::TScoredWords candidates = GetCandidatesScoredRaw(sentence, j);
+            if (candidates.empty()) {
+                continue;
+            }
+            std::wstring firstCandidate(candidates[0].Word.Ptr, candidates[0].Word.Len);
+            if (wCurrWord == firstCandidate) { //i.e. the input word was correctly spelled
+                continue;
+            }
+            nlohmann::json currentResult;
+            currentResult["pos_from"] = currWord.Ptr - &input[0];
+            currentResult["len"] = currWord.Len;
+            currentResult["candidates"] = nlohmann::json::array();
+            currentResult["original"] = NJamSpell::WideToUTF8(wCurrWord);
+
+            size_t candidatesSize = std::min(candidates.size(), size_t(7));
+            for (size_t k = 0; k < candidatesSize; ++k) {
+                nlohmann::json cand;
+                NJamSpell::TScoredWord candidate = candidates[k];
+                std::string candidateStr = NJamSpell::WideToUTF8(std::wstring(candidate.Word.Ptr, candidate.Word.Len));
+                cand["candidate"] = candidateStr;
+                cand["score"] = candidate.Score;
+                currentResult["candidates"].push_back(cand);
+            }
+
+            results["results"].push_back(currentResult);
+        }
+    }
+
+    return results.dump(4);
 }
 
 std::vector<std::wstring> TSpellCorrector::GetCandidates(const std::vector<std::wstring>& sentence, size_t position) const {
@@ -250,8 +324,8 @@ void TSpellCorrector::SetPenalty(double knownWordsPenaly, double unknownWordsPen
     UnknownWordsPenalty = unknownWordsPenalty;
 }
 
-void TSpellCorrector::SetMaxCandiatesToCheck(size_t maxCandidatesToCheck) {
-    MaxCandiatesToCheck = maxCandidatesToCheck;
+void TSpellCorrector::SetMaxCandidatesToCheck(size_t maxCandidatesToCheck) {
+    MaxCandidatesToCheck = maxCandidatesToCheck;
 }
 
 const TLangModel& TSpellCorrector::GetLangModel() const {
@@ -379,9 +453,11 @@ void TSpellCorrector::Inserts2(const std::wstring& w, TWords& result) const {
 }
 
 void TSpellCorrector::PrepareCache() {
+    std::cerr << "[info] preparing cache" << std::endl;
     auto&& wordToId = LangModel.GetWordToId();
     size_t n = 0;
     size_t s = 0;
+    std::cerr << "  starting loop 1\n"; 
     for (auto&& it: wordToId) {
         n += 1;
         s += it.first.size();
@@ -391,6 +467,8 @@ void TSpellCorrector::PrepareCache() {
     }
     size_t avgWordLen = std::max(int(double(s) / n) + 1, 1);
     size_t avgWordLenMinusOne = std::max(size_t(1), avgWordLen - 1);
+
+    std::cerr << "  average word length " << avgWordLen << std::endl;
 
     uint64_t deletes1size = wordToId.size() * avgWordLen;
     uint64_t deletes2size = wordToId.size() * avgWordLen * avgWordLenMinusOne;
@@ -404,23 +482,44 @@ void TSpellCorrector::PrepareCache() {
     uint64_t deletes1real = 0;
     uint64_t deletes2real = 0;
 
+    std::cerr << "  starting loop 2\n";
+    n = 0;
     for (auto&& it: wordToId) {
-        auto deletes = GetDeletes2(it.first);
-        for (auto&& w1: deletes) {
-            Deletes1->Insert(WideToUTF8(w1.back()));
-            deletes1real += 1;
-            for (size_t i = 0; i < w1.size() - 1; ++i) {
-                Deletes2->Insert(WideToUTF8(w1[i]));
-                deletes2real += 1;
+        n += 1;
+        try{
+            std::cerr << "    " << n << "/" << wordToId.size() << " complete\r";
+            auto deletes = GetDeletes2(it.first);
+            for (auto&& w1: deletes) {
+                try{
+                    Deletes1->Insert(WideToUTF8(w1.back()));
+                    deletes1real += 1;
+                    for (size_t i = 0; i < w1.size() - 1; ++i) {
+                        try{
+                            Deletes2->Insert(WideToUTF8(w1[i]));
+                            deletes2real += 1;
+                        }
+                        catch(const std::runtime_error& re) { std::cerr << "[error] [922] Runtime error caught: " << re.what() << "\n";}
+                        catch(const std::exception& ex){ std::cerr << "[error] [921] Error caught: " << ex.what() << "\n";}
+                        catch(...){ std::cerr << "[error] [920] Unknown exception caught in middle cache prep loop. Continuing" << "\n"; }
+                    }
+                }
+                catch(const std::runtime_error& re) { std::cerr << "[error] [912] Runtime error caught: " << re.what() << "\n"; }
+                catch(const std::exception& ex){ std::cerr << "[error] [911] Error caught: " << ex.what() << "\n"; }
+                catch(...){ std::cerr << "[error] [910] Unknown exception caught in middle cache prep loop. Continuing" << "\n"; }
             }
         }
+        catch(const std::runtime_error& re) { std::cerr << "[error] [902] Runtime error caught: " << re.what() << "\n";}
+        catch(const std::exception& ex){ std::cerr << "[error] [901] Error caught: " << ex.what() << "\n";}
+        catch(...){std::cerr << "[error] [900] Unknown exception caught in outer cache prep loop. Continuing. n="<< n << "\n"; } 
     }
+    std::cerr << "[info] cache preparation complete\n";
 }
 
 constexpr uint64_t SPELL_CHECKER_CACHE_MAGIC_BYTE = 3811558393781437494L;
 constexpr uint16_t SPELL_CHECKER_CACHE_VERSION = 1;
 
 bool TSpellCorrector::LoadCache(const std::string& cacheFile) {
+    std::cerr << "[info] loading cache (" << cacheFile << ")\n";
     std::ifstream in(cacheFile, std::ios::binary);
     if (!in.is_open()) {
         return false;
@@ -455,6 +554,7 @@ bool TSpellCorrector::LoadCache(const std::string& cacheFile) {
 }
 
 bool TSpellCorrector::SaveCache(const std::string& cacheFile) {
+    std::cerr << "[info] saving cache (" << cacheFile << ")\n";
     std::ofstream out(cacheFile, std::ios::binary);
     if (!out.is_open()) {
         return false;
@@ -468,6 +568,7 @@ bool TSpellCorrector::SaveCache(const std::string& cacheFile) {
     Deletes1->Dump(out);
     Deletes2->Dump(out);
     NHandyPack::Dump(out, SPELL_CHECKER_CACHE_MAGIC_BYTE);
+    std::cerr << "[info] cache saved\n";
     return true;
 }
 

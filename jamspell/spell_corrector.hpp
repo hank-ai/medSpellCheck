@@ -12,12 +12,15 @@ class TSpellCorrector {
 public:
     bool LoadLangModel(const std::string& modelFile);
     bool TrainLangModel(const std::string& textFile, const std::string& alphabetFile, const std::string& modelFile);
+    NJamSpell::TScoredWords GetCandidatesScoredRaw(const NJamSpell::TWords& sentence, size_t position) const;
     NJamSpell::TWords GetCandidatesRaw(const NJamSpell::TWords& sentence, size_t position) const;
+    std::string TSpellCorrector::GetALLCandidatesScoredJSON(const std::string& text) const;
+    NJamSpell::TScoredWords TSpellCorrector::GetCandidatesScored(const std::vector<std::wstring>& sentence, size_t position) const;
     std::vector<std::wstring> GetCandidates(const std::vector<std::wstring>& sentence, size_t position) const;
     std::wstring FixFragment(const std::wstring& text) const;
     std::wstring FixFragmentNormalized(const std::wstring& text) const;
     void SetPenalty(double knownWordsPenaly, double unknownWordsPenalty);
-    void SetMaxCandiatesToCheck(size_t maxCandidatesToCheck);
+    void SetMaxCandidatesToCheck(size_t maxCandidatesToCheck);
     const NJamSpell::TLangModel& GetLangModel() const;
 private:
     void FilterCandidatesByFrequency(std::unordered_set<NJamSpell::TWord, NJamSpell::TWordHashPtr>& uniqueCandidates, NJamSpell::TWord origWord) const;
@@ -34,7 +37,7 @@ private:
     std::unique_ptr<TBloomFilter> Deletes2;
     double KnownWordsPenalty = 20.0;
     double UnknownWordsPenalty = 5.0;
-    size_t MaxCandiatesToCheck = 14;
+    size_t MaxCandidatesToCheck = 14;
 };
 
 

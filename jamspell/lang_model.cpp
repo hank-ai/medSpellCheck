@@ -104,12 +104,18 @@ bool TLangModel::Train(const std::string& fileName, const std::string& alphabetF
         return false;
     }
     std::wstring trainText = UTF8ToWide(LoadFile(fileName));
+    std::cerr << "[info] done loading text. converting to lowercase now\n";  
     ToLower(trainText);
+    std::cerr << "[info> done converting to lowercase. tokenizing sentences now" << std::endl;
+  
     TSentences sentences = Tokenizer.Process(trainText);
     if (sentences.empty()) {
         std::cerr << "[error] no sentences" << std::endl;
         return false;
     }
+    std::cerr << "[info] " << sentences.size() << " sentences loaded" << std::endl;
+
+    std::cerr << "[info] converting to ids" << std::endl;
 
     TIdSentences sentenceIds = ConvertToIds(sentences);
 
@@ -238,6 +244,8 @@ bool TLangModel::Dump(const std::string& modelFileName) const {
 }
 
 bool TLangModel::Load(const std::string& modelFileName) {
+    std::cerr << "[info] loading model (" << modelFileName << ")\n";
+
     std::ifstream in(modelFileName, std::ios::binary);
     if (!in.is_open()) {
         return false;

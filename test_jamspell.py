@@ -1,6 +1,6 @@
 import os
-import pytest
 import jamspell
+import pytest
 from evaluate import generate_dataset
 from evaluate.evaluate import evaluateJamspell
 

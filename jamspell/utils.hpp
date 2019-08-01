@@ -28,6 +28,17 @@ struct TWord {
     size_t Len = 0;
 };
 
+struct TScoredWord {
+    TScoredWord() = default;
+    TScoredWord(TWord word, double score)
+        : Word(word)
+        , Score(score)
+    {
+    }
+    TWord Word;
+    double Score = 0;
+};
+
 struct TWordHashPtr {
 public:
   std::size_t operator()(const TWord& x) const {
@@ -36,21 +47,22 @@ public:
 };
 
 using TWords = std::vector<TWord>;
+using TScoredWords = std::vector<TScoredWord>;
 using TSentences = std::vector<TWords>;
 
 class TTokenizer {
-public:
-    TTokenizer();
-    bool LoadAlphabet(const std::string& alphabetFile);
-    TSentences Process(const std::wstring& originalText) const;
-    void Clear();
+    public:
+        TTokenizer();
+        bool LoadAlphabet(const std::string& alphabetFile);
+        TSentences Process(const std::wstring& originalText) const;
+        void Clear();
 
-    const std::unordered_set<wchar_t>& GetAlphabet() const;
+        const std::unordered_set<wchar_t>& GetAlphabet() const;
 
-    HANDYPACK(Alphabet)
-private:
-    std::unordered_set<wchar_t> Alphabet;
-    std::locale Locale;
+        HANDYPACK(Alphabet);
+    private:
+        std::unordered_set<wchar_t> Alphabet;
+        std::locale Locale;
 };
 
 std::string LoadFile(const std::string& fileName);

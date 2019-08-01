@@ -1,5 +1,4 @@
 .idea/
-*.txt
 *.pyc
 *.aff
 *.dic
@@ -10,3 +9,9 @@
 *.tar.gz
 *.spell
 *.cache
+/dist
+/.vs
+/build
+/jamspell.egg-info
+.vscode/settings.json
+jamspell_wrap.cpp

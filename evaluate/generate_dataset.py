@@ -9,7 +9,7 @@ import xml.sax
 from collections import defaultdict
 
 RANDOM_SEED = 42
-TRAIN_TEST_SPLIT = 0.95
+TRAIN_TEST_SPLIT = 0.97
 LANG_DETECT_FRAGMENT_SIZE = 2000
 
 
@@ -107,9 +107,14 @@ class TxtDataSource(DataSource):
     def isMatch(self, pathToFile):
         return pathToFile.endswith('.txt')
 
-    def loadSentences(self, pathToFile, sentences):
+    def loadSentences(self, pathToFile, sentences): 
+        print('[info] calculating line count in {}'.format(pathToFile))   
+        numlines = sum(1 for x in open(pathToFile))
+        print('[info] total lines: {:,}'.format(numlines))
+        outMod = int(numlines/10)
         with codecs.open(pathToFile, 'r', 'utf-8') as f:
-            for line in f.read().split('\n'):
+            for i, line in enumerate(f.read().split('\n')):
+                if i%outMod==0: print("  {:,}/{:,}".format(i, numlines))
                 line = line.strip().lower()
                 if not line:
                     continue
@@ -164,10 +169,10 @@ def processSentences(sentences, outFile):
     trainSentences = sentences[:trainHalf]
     testSentences = sentences[trainHalf:]
 
-    print('[info] saving train set')
+    print('[info] saving train set ({})'.format(len(trainSentences)))
     saveSentences(trainSentences, outFile + '_train.txt')
 
-    print('[info] saving test set')
+    print('[info] saving test set ({})'.format(len(testSentences)))
     saveSentences(testSentences, outFile + '_test.txt')
 
     print('[info] done')
