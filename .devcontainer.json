@@ -1,0 +1,6 @@
+// See https://aka.ms/vscode-remote/devcontainer.json for format details or
+// https://aka.ms/vscode-dev-containers/definitions for sample configurations.
+{
+	"dockerFile": "../../../../../../workspaces/medSpellService/Dockerfile",
+	"extensions": []
+}

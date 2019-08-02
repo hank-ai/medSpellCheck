@@ -104,10 +104,10 @@ bool TLangModel::Train(const std::string& fileName, const std::string& alphabetF
         return false;
     }
     std::wstring trainText = UTF8ToWide(LoadFile(fileName));
-    std::cerr << "[info] done loading text. converting to lowercase now\n";  
+    std::cerr << "[info] done loading text. converting to lowercase now\n";
     ToLower(trainText);
     std::cerr << "[info> done converting to lowercase. tokenizing sentences now" << std::endl;
-  
+
     TSentences sentences = Tokenizer.Process(trainText);
     if (sentences.empty()) {
         std::cerr << "[error] no sentences" << std::endl;
@@ -260,7 +260,14 @@ bool TLangModel::Load(const std::string& modelFileName) {
     if (version != LANG_MODEL_VERSION) {
         return false;
     }
-    Load(in);
+    try {
+        Load(in);
+    }
+    catch(const std::bad_alloc& e) {
+        std::cerr << "Failed to load file" << "\n";
+        std::cerr << e.what() << '\n';
+    }
+
     magicByte = 0;
     NHandyPack::Load(in, magicByte);
     if (magicByte != LANG_MODEL_MAGIC_BYTE) {
