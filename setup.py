@@ -46,22 +46,33 @@ class Swig3Ext(build_ext):
         assert subprocess.check_output([swigBinary, "-version"]).find(b'SWIG Version 3') != -1
         return swigBinary
 
-VERSION = '0.0.11'
+VERSION = '1.0.0'
+
+##
+# Original Credit
+#
+# name='jamspell',
+# author='Filipp Ozinov',
+# author_email='fippo@mail.ru',
+# url='https://github.com/bakwc/JamSpell',
+# download_url='https://github.com/bakwc/JamSpell/tarball/' + VERSION,
+##
 
 setup(
-    name='jamspell',
+    name='medSpellCheck',
     version=VERSION,
-    author='Filipp Ozinov',
-    author_email='fippo@mail.ru',
-    url='https://github.com/bakwc/JamSpell',
-    download_url='https://github.com/bakwc/JamSpell/tarball/' + VERSION,
+    author='Jack Neil',
+    author_email='jack.neil@hank.ai',
+    url='https://github.com/hank-ai/medSpellCheck/',
+    download_url='https://github.com/hank-ai/medSpellCheck/tarball/' + VERSION,
     description='spell checker',
     long_description='context-based spell checker',
-    keywords=['nlp', 'spell', 'spell-checker', 'jamspell'],
+    keywords=['nlp', 'spell', 'spell-checker', 'jamspell', 'hankai'],
     classifiers=[
         'Programming Language :: Python :: 2.7',
         'License :: OSI Approved :: MIT License',
     ],
+    ## TODO Update to be "medSpellCheck"
     py_modules=['jamspell'],
     ext_modules=[jamspell],
     zip_safe=False,
