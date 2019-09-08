@@ -11,15 +11,10 @@
 
 //TScoredWords = vector<TScoredWord>;
 
-
 // Instantiate templates used by example
 namespace std {
    %template(StringVector) vector<wstring>;
 }
 
-
-
 %include "jamspell/spell_corrector.hpp"
 #include "jamspell/utils.hpp"
-
-

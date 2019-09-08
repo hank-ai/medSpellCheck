@@ -14,8 +14,8 @@ public:
     bool TrainLangModel(const std::string& textFile, const std::string& alphabetFile, const std::string& modelFile);
     NJamSpell::TScoredWords GetCandidatesScoredRaw(const NJamSpell::TWords& sentence, size_t position) const;
     NJamSpell::TWords GetCandidatesRaw(const NJamSpell::TWords& sentence, size_t position) const;
-    std::string TSpellCorrector::GetALLCandidatesScoredJSON(const std::string& text) const;
-    NJamSpell::TScoredWords TSpellCorrector::GetCandidatesScored(const std::vector<std::wstring>& sentence, size_t position) const;
+    std::string GetALLCandidatesScoredJSON(const std::string& text) const;
+    NJamSpell::TScoredWords GetCandidatesScored(const std::vector<std::wstring>& sentence, size_t position) const;
     std::vector<std::wstring> GetCandidates(const std::vector<std::wstring>& sentence, size_t position) const;
     std::wstring FixFragment(const std::wstring& text) const;
     std::wstring FixFragmentNormalized(const std::wstring& text) const;

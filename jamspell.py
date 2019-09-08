@@ -310,8 +310,8 @@ class TSpellCorrector(_object):
     def SetPenalty(self, knownWordsPenaly, unknownWordsPenalty):
         return _jamspell.TSpellCorrector_SetPenalty(self, knownWordsPenaly, unknownWordsPenalty)
 
-    def SetMaxCandiatesToCheck(self, maxCandidatesToCheck):
-        return _jamspell.TSpellCorrector_SetMaxCandiatesToCheck(self, maxCandidatesToCheck)
+    def SetMaxCandidatesToCheck(self, maxCandidatesToCheck):
+        return _jamspell.TSpellCorrector_SetMaxCandidatesToCheck(self, maxCandidatesToCheck)
 
     def GetLangModel(self):
         return _jamspell.TSpellCorrector_GetLangModel(self)
